@@ -1,0 +1,44 @@
+Deliverable B - Due 10/22/17
+Identify a firm with general interest to the team
+  Chipotle, per 10/3 conference call
+Identify major competitors
+  Fast casual restaurants
+    Panera
+    Noodles
+    Who else?
+  What else?
+Initial data acquisition and analysis
+  Sentiment analysis from Twitter
+  Stock performance of CMG over the relevant period of time
+  Stock performance of major competitors to control for some variability
+
+
+Deliverable C - Due 11/12/17
+  Data acquisition should be completed
+  Analysis and modeling started
+  Final report writing started
+  Overview of plan for management of the report
+
+
+Introduction
+  Company Overview
+    Strengths
+    Weaknesses
+    Opportunities
+    Threats
+  Data Acquisition
+    Web crawlers
+    Social Media APIs
+    Unspecified techniques
+Methods
+  Sentiment Analysis
+    Natural Language Processing
+    Text Analysis
+    Website Analysis
+    Mobile App Analysis
+    Social Media Analysis
+  Potential Predictive Models
+Results
+Conclusion
+Recommendation
+References
