@@ -1,6 +1,7 @@
 import requests
 import json
 import datetime
+from datetime import timedelta
 from abc import ABCMeta
 from abc import abstractmethod
 from urllib import parse
@@ -30,6 +31,7 @@ class TwitterSearch(metaclass=ABCMeta):
                         advanced search: https://twitter.com/search-advanced
         """
         url = self.construct_url(query)
+
         continue_search = True
         min_tweet = None
         response = self.execute_search(url)
@@ -67,11 +69,13 @@ class TwitterSearch(metaclass=ABCMeta):
         try:
             # Specify a user agent to prevent Twitter from returning a profile card
             headers = {
-                'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.'
-                              '86 Safari/537.36'
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'
             }
+
+            print(url)
             req = requests.get(url, headers=headers)
             # response = urllib2.urlopen(req)
+            print(req.text)
             data = json.loads(req.text)
             return data
 
@@ -160,6 +164,7 @@ class TwitterSearch(metaclass=ABCMeta):
             params['max_position'] = max_position
 
         url_tupple = ('https', 'twitter.com', '/i/search/timeline', '', parse.urlencode(params), '')
+        print(parse.urlunparse(url_tupple))
         return parse.urlunparse(url_tupple)
 
     @abstractmethod
@@ -216,6 +221,7 @@ class TwitterSlicer(TwitterSearch):
         self.until = until
         self.n_threads = n_threads
         self.counter = 0
+        self.max_tweets = 2000
 
     def search(self, query):
         n_days = (self.until - self.since).days
@@ -238,11 +244,17 @@ class TwitterSlicer(TwitterSearch):
             line_termination = '\r\n'  # Windows line termination
         if (windows_system == False):
             line_termination = '\n'  # Unix/Linus/Mac line termination
-
-        with open('chipotle.txt', 'a') as outfile:
+        print(currentDate)
+        name = 'Chipotle'
+        name += currentDate
+        name += 'outbreaks.txt'
+        print(name)
+        with open('%s' % name, 'a') as outfile:
             for tweet in tweets:
                 # Lets add a counter so we only collect a max number of tweets
                 self.counter += 1
+                if self.max_tweets is not None and self.counter >= self.max_tweets:
+                    return False
                 if tweet['created_at'] is not None:
                     t = datetime.datetime.fromtimestamp((tweet['created_at']/1000))
                     fmt = "%Y-%m-%d %H:%M:%S"
@@ -256,7 +268,7 @@ class TwitterSlicer(TwitterSearch):
 if __name__ == '__main__':
     log.basicConfig(level=log.INFO)
 
-    search_query = "Chipotle E Coli"
+    search_query = "Chipotle"
     rate_delay_seconds = 0
     error_delay_seconds = 5
 
@@ -265,13 +277,21 @@ if __name__ == '__main__':
     # twit.search(search_query)
 
     # Example of using TwitterSlice
-    select_tweets_since = datetime.datetime.strptime("2017-06-01", '%Y-%m-%d')
-    select_tweets_until = datetime.datetime.strptime("2017-07-01", '%Y-%m-%d')
-    threads = 10
+    datesince = ['2015-10-01','2015-10-02','2015-10-03','2015-10-04','2015-10-05','2015-10-06',
+                 '2015-10-07', '2015-10-08', '2015-10-09', '2015-10-10', '2015-10-11', '2015-10-12',
+                 '2015-10-13', '2015-10-14', '2015-10-15', '2015-10-16', '2015-10-17', '2015-10-18',
+                 '2015-10-19', '2015-10-20', '2015-10-21', '2015-10-22', '2015-10-23', '2015-10-24',
+                 '2015-10-25', '2015-10-26', '2015-10-27', '2015-10-28', '2015-10-29', '2015-10-30','2015-10-31']
+    currentDate = '2015-10-21'
 
-    twitSlice = TwitterSlicer(rate_delay_seconds, error_delay_seconds, select_tweets_since, select_tweets_until,
-                              threads)
-    twitSlice.search(search_query)
+    for idx,date in enumerate(datesince):
+        currentDate = date
+        select_tweets_since = datetime.datetime.strptime(date, '%Y-%m-%d')
+        select_tweets_until = select_tweets_since + timedelta(days=1)
+        threads = 10
+
+        twitSlice = TwitterSlicer(rate_delay_seconds, error_delay_seconds, select_tweets_since, select_tweets_until,threads)
+        twitSlice.search(search_query)
 
     # print("TwitterSearch collected %i" % twit.counter)
     print("TwitterSlicer collected %i" % twitSlice.counter)
